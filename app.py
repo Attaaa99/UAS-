@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # =========================
-# CSS INTERNAL (PERBAIKAN TOTAL MOBILE & LAPTOP)
+# CSS INTERNAL (PERBAIKAN MOBILE & LAPTOP)
 # =========================
 st.markdown("""
 <style>
@@ -27,16 +27,16 @@ st.markdown("""
 .calc-title {
     color: #ff2d8d;
     text-align: center;
-    font-size: clamp(24px, 4vw, 45px);
+    font-size: 45px;
     font-weight: bold;
     text-shadow: 0 0 20px #ff2d8d;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 /* Sub-judul Text Pink */
 .sub-pink {
     color: #ff2d8d;
-    font-size: clamp(14px, 2vw, 18px);
+    font-size: 18px;
     font-weight: bold;
     letter-spacing: 1px;
     margin-bottom: 8px;
@@ -47,21 +47,21 @@ st.markdown("""
     background: #0d0d19;
     border: 2px solid #ff2d8d;
     border-radius: 15px;
-    padding: clamp(12px, 2vw, 20px);
+    padding: 20px;
     text-align: right;
-    min-height: 80px;
+    min-height: 100px;
     box-shadow: 0 0 15px rgba(255, 45, 141, 0.2);
 }
 
 .display-main {
-    font-size: clamp(28px, 5vw, 48px);
+    font-size: 48px;
     font-weight: bold;
     color: #ffffff;
     font-family: monospace;
 }
 
 .display-sub {
-    font-size: clamp(14px, 2vw, 20px);
+    font-size: 20px;
     color: #ff2d8d;
     font-family: monospace;
     opacity: 0.8;
@@ -71,25 +71,49 @@ st.markdown("""
 .stButton > button {
     width: 100%;
     height: 60px;
-    font-size: clamp(16px, 2vw, 22px);
+    font-size: 22px;
     font-weight: bold;
     border-radius: 12px;
     border: none;
     transition: all 0.1s ease;
 }
 
-/* Warna Tombol Angka */
-.stButton > button:not([data-basebutton="true"]) {
+/* Angka */
+.stButton > button[key*="num-"] {
     background-color: #16162a;
     color: white;
     border: 1px solid #ff2d8d22;
 }
-
-/* Warna Hover Umum */
-.stButton > button:hover {
-    background-color: #ff2d8d !important;
-    color: black !important;
+.stButton > button[key*="num-"]:hover {
+    background-color: #ff2d8d;
+    color: black;
     box-shadow: 0 0 15px #ff2d8d;
+}
+
+/* Operator */
+.stButton > button[key*="op-"] {
+    background-color: #ff2d8d;
+    color: black;
+}
+.stButton > button[key*="op-"]:hover {
+    background-color: #ff66b2;
+    box-shadow: 0 0 20px #ff66b2;
+}
+
+/* Tombol Aksi */
+.stButton > button[key*="act-"] {
+    background-color: #333344;
+    color: white;
+}
+.stButton > button[key*="act-"]:hover {
+    background-color: #ff2d8d;
+}
+
+/* Tombol ENTER Tinggi di Desktop */
+.stButton > button[key="act-enter"] {
+    background-color: #ff2d8d;
+    color: black;
+    height: 196px;
 }
 
 /* Sidebar */
@@ -98,28 +122,40 @@ st.markdown("""
     border-right: 2px solid #ff2d8d;
 }
 
-/* ==========================================
-   CSS TRICK KHUSUS RESPONSIVE LAYAR HP
-   ========================================== */
+/* ===================================================
+   TRICK RESPONSIVE KHUSUS UNTUK HP (ANTI BERANTAKAN)
+   =================================================== */
 @media (max-width: 768px) {
-    /* 1. Paksa baris kolom tombol keypad agar TETAP horizontal ke samping */
-    div[data-testid="stHorizontalBlock"] {
+    /* Paksa kolom bagian dalam (keypad) agar TETAP berjejer ke samping di HP */
+    div[data-testid="column"] div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 5px !important;
-    }
-    
-    /* 2. Biarkan layout utama (Layar vs Keypad) tetap menumpuk vertikal atas-bawah */
-    div.stMainBlockContainer > div[data-testid="stHorizontalBlock"],
-    div[data-testid="stVerticalBlock"] > div[data-testid="stHorizontalBlock"]:first-child {
-        flex-direction: column !important;
+        gap: 6px !important;
+        width: 100% !important;
     }
 
-    /* 3. Perkecil tinggi tombol di HP agar pas satu layar */
+    /* Pastikan flexbox anak membagi ruang secara merata */
+    div[data-testid="column"] div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* Sesuaikan ukuran tombol agar fit di layar HP */
     .stButton > button {
         height: 46px !important;
         font-size: 14px !important;
         border-radius: 8px !important;
+    }
+
+    /* Sesuaikan tinggi tombol ENTER khusus di HP agar pas dengan tinggi 3 baris angka */
+    .stButton > button[key="act-enter"] {
+        height: 150px !important;
+    }
+    
+    /* Perkecil ukuran font judul di HP */
+    .calc-title {
+        font-size: 28px !important;
     }
 }
 </style>
@@ -138,7 +174,7 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 # =========================
-# FUNGSI INTERAKSI LOGIKA (ASLI)
+# FUNGSI INTERAKSI LOGIKA
 # =========================
 def input_angka(angka):
     st.session_state.current_input += str(angka)
@@ -169,7 +205,7 @@ def aksi_ac():
     st.session_state.stack = []
     st.session_state.current_input = ""
 
-# Callback khusus untuk hapus riwayat agar tidak menggunakan st.rerun()
+# Callback pengganti st.rerun() untuk menghapus riwayat aman
 def aksi_hapus_riwayat():
     st.session_state.history = []
 
@@ -249,7 +285,7 @@ pilihan_menu = st.sidebar.radio("Pindah Halaman:", ["🧮 Kalkulator RPN", "📜
 if pilihan_menu == "🧮 Kalkulator RPN":
     st.markdown("<div class='calc-title'>RPN CALCULATOR</div>", unsafe_allow_html=True)
 
-    # Membagi layout Kiri (Layar) dan Kanan (Keypad)
+    # Membagi layout seimbang Kiri (Layar Stack aktif) dan Kanan (Keypad kalkulator)
     kol_kiri, kol_kanan = st.columns([1, 1.2], gap="large")
 
     with kol_kiri:
@@ -320,7 +356,7 @@ if pilihan_menu == "🧮 Kalkulator RPN":
             k3[3].button(".", key="num-dot", on_click=input_desimal)
 
         with sub_kanan:
-            # Tombol Enter (Menggunakan teks biasa agar tidak memotong layout lebar di HP)
+            # Tombol Enter Panjang Vertikal (ENT agar tidak memotong di HP)
             st.button("ENT", key="act-enter", on_click=aksi_enter)
 
         # Baris Paling Bawah - Angka 0 Lebar dan Reset AC
@@ -339,7 +375,7 @@ elif pilihan_menu == "📜 Riwayat Perhitungan":
         df_logs = pd.DataFrame(st.session_state.history)
         st.dataframe(df_logs, use_container_width=True)
         
-        # MENGGUNAKAN ON_CLICK CALLBACK (st.rerun dihapus total agar tidak error di server cloud)
+        # FITUR ST.RERUN KINI DIHAPUS TOTAL DAN DIGANTI DENGAN CALLBACK (on_click) AGAR SEHAT DAN AMAN
         st.button("Hapus Semua Riwayat", key="act-del-hist", on_click=aksi_hapus_riwayat)
     else:
         st.info("Belum ada riwayat operasi matematika yang tersimpan.")
